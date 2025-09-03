@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { getBoundingBoxFromPolygon, getMapGraph, getNearestNode } from "../services/MapService";
 import PathfindingState from "../models/PathfindingState";
 import Interface from "./Interface";
-import { INITIAL_COLORS, INITIAL_VIEW_STATE, MAP_STYLE } from "../config";
+import { INITIAL_COLORS, INITIAL_VIEW_STATE, MAP_STYLES, INITIAL_SETTINGS } from "../config";
 import useSmoothStateChange from "../hooks/useSmoothStateChange";
 
 function Map() {
@@ -26,7 +26,7 @@ function Map() {
     const [cinematic, setCinematic] = useState(false);
     const [placeEnd, setPlaceEnd] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [settings, setSettings] = useState({ algorithm: "astar", radius: 4, speed: 5 });
+    const [settings, setSettings] = useState(INITIAL_SETTINGS);
     const [colors, setColors] = useState(INITIAL_COLORS);
     const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
     const ui = useRef();
@@ -260,6 +260,10 @@ function Map() {
         }
     }
 
+    function changeMapStyle(mapStyle) {
+        changeSettings({...settings, mapStyle});
+    }
+
     useEffect(() => {
         if(!started) return;
         requestRef.current = requestAnimationFrame(animate);
@@ -339,7 +343,7 @@ function Map() {
                     />
                     <MapGL 
                         reuseMaps mapLib={maplibregl} 
-                        mapStyle={MAP_STYLE} 
+                        mapStyle={MAP_STYLES[settings.mapStyle]} 
                         doubleClickZoom={false}
                     />
                 </DeckGL>
@@ -360,6 +364,7 @@ function Map() {
                 settings={settings}
                 setSettings={changeSettings}
                 changeAlgorithm={changeAlgorithm}
+                changeMapStyle={changeMapStyle}
                 colors={colors}
                 setColors={changeColors}
                 loading={loading}

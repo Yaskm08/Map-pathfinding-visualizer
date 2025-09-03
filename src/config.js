@@ -1,4 +1,9 @@
-export const MAP_STYLE = "./map_style.json";
+export const MAP_STYLES = {
+    dark: "./map_style.json",
+    satellite: "./satellite_style.json"
+};
+
+export const MAP_STYLE = MAP_STYLES.dark;
 
 export const INITIAL_VIEW_STATE = {
     longitude: -0.127,
@@ -15,6 +20,13 @@ export const INITIAL_COLORS = {
     endNodeBorder: [0, 0, 0],
     path: [70, 183, 128],
     route: [165, 13, 32],
+};
+
+export const INITIAL_SETTINGS = {
+    algorithm: "astar",
+    radius: 4,
+    speed: 5,
+    mapStyle: "dark"
 };
 
 export const LOCATIONS = [

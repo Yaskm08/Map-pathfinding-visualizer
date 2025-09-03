@@ -1,0 +1,82 @@
+{
+  "version": 8,
+  "name": "Satellite",
+  "metadata": {
+    "maputnik:renderer": "mbgljs"
+  },
+  "sources": {
+    "satellite": {
+      "type": "raster",
+      "tiles": [
+        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+      ],
+      "tileSize": 256,
+      "attribution": "© Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community",
+      "maxzoom": 18
+    },
+    "labels": {
+      "type": "vector",
+      "url": "https://tiles.basemaps.cartocdn.com/vector/carto.streets/v1/tiles.json"
+    }
+  },
+  "sprite": "https://tiles.basemaps.cartocdn.com/gl/voyager-gl-style/sprite",
+  "glyphs": "https://tiles.basemaps.cartocdn.com/fonts/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "satellite",
+      "type": "raster",
+      "source": "satellite",
+      "minzoom": 0,
+      "maxzoom": 22
+    },
+    {
+      "id": "road",
+      "type": "line",
+      "source": "labels",
+      "source-layer": "transportation",
+      "filter": [
+        "all",
+        ["!=", "brunnel", "tunnel"],
+        ["in", "class", "motorway", "trunk", "primary", "secondary", "tertiary"]
+      ],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "rgba(255, 255, 255, 0.8)",
+        "line-width": {
+          "base": 1.2,
+          "stops": [
+            [6, 0.5],
+            [20, 30]
+          ]
+        }
+      }
+    },
+    {
+      "id": "place-city",
+      "type": "symbol",
+      "source": "labels",
+      "source-layer": "place",
+      "filter": ["==", "class", "city"],
+      "layout": {
+        "text-field": "{name}",
+        "text-font": ["Open Sans Regular"],
+        "text-size": {
+          "stops": [
+            [4, 9],
+            [6, 12]
+          ]
+        },
+        "text-transform": "uppercase",
+        "text-letter-spacing": 0.1
+      },
+      "paint": {
+        "text-color": "#ffffff",
+        "text-halo-color": "rgba(0, 0, 0, 0.7)",
+        "text-halo-width": 1
+      }
+    }
+  ]
+}
