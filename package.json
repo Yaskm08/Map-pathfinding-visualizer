@@ -23,8 +23,10 @@
     "mui-color-input": "^2.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-globe.gl": "^2.35.0",
     "react-map-gl": "^7.1.6",
-    "sass": "^1.69.3"
+    "sass": "^1.69.3",
+    "three": "^0.180.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

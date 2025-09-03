@@ -6,7 +6,7 @@ import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from "re
 import { INITIAL_COLORS, LOCATIONS, INITIAL_SETTINGS } from "../config";
 import { arrayToRgb, rgbToArray } from "../helpers";
 
-const Interface = forwardRef(({ canStart, started, animationEnded, playbackOn, time, maxTime, settings, colors, loading, timeChanged, cinematic, placeEnd, changeRadius, changeAlgorithm, changeMapStyle, setPlaceEnd, setCinematic, setSettings, setColors, startPathfinding, toggleAnimation, clearPath, changeLocation }, ref) => {
+const Interface = forwardRef(({ canStart, started, animationEnded, playbackOn, time, maxTime, settings, colors, loading, timeChanged, cinematic, placeEnd, changeRadius, changeAlgorithm, changeMapStyle, changeViewMode, setPlaceEnd, setCinematic, setSettings, setColors, startPathfinding, toggleAnimation, clearPath, changeLocation }, ref) => {
     const [sidebar, setSidebar] = useState(false);
     const [snack, setSnack] = useState({
         open: false,
@@ -291,6 +291,22 @@ const Interface = forwardRef(({ canStart, started, animationEnded, playbackOn, t
                         >
                             <MenuItem value={"dark"}>Dark Vector</MenuItem>
                             <MenuItem value={"satellite"}>Satellite</MenuItem>
+                        </Select>
+                    </FormControl>
+
+                    <FormControl variant="filled">
+                        <InputLabel style={{ fontSize: 14 }} id="view-mode-select">View Mode</InputLabel>
+                        <Select
+                            labelId="view-mode-select"
+                            value={settings.viewMode}
+                            onChange={e => {changeViewMode(e.target.value);}}
+                            required
+                            style={{ backgroundColor: "#404156", color: "#fff", width: "100%", paddingLeft: 1 }}
+                            inputProps={{MenuProps: {MenuListProps: {sx: {backgroundColor: "#404156"}}}}}
+                            size="small"
+                        >
+                            <MenuItem value={"2d"}>2D Map</MenuItem>
+                            <MenuItem value={"3d"}>3D Globe</MenuItem>
                         </Select>
                     </FormControl>
 

@@ -13,6 +13,12 @@ export const INITIAL_VIEW_STATE = {
     bearing: 0
 };
 
+export const INITIAL_GLOBE_VIEW_STATE = {
+    longitude: 0,
+    latitude: 0,
+    zoom: 0
+};
+
 export const INITIAL_COLORS = {
     startNodeFill: [70, 183, 128],
     startNodeBorder: [255, 255, 255],
@@ -26,7 +32,8 @@ export const INITIAL_SETTINGS = {
     algorithm: "astar",
     radius: 4,
     speed: 5,
-    mapStyle: "dark"
+    mapStyle: "dark",
+    viewMode: "2d"
 };
 
 export const LOCATIONS = [

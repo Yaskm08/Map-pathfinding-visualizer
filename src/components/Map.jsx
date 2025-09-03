@@ -4,12 +4,13 @@ import maplibregl from "maplibre-gl";
 import { PolygonLayer, ScatterplotLayer } from "@deck.gl/layers";
 import { FlyToInterpolator } from "deck.gl";
 import { TripsLayer } from "@deck.gl/geo-layers";
+import GlobeView from "./Globe";
 import { createGeoJSONCircle } from "../helpers";
 import { useEffect, useRef, useState } from "react";
 import { getBoundingBoxFromPolygon, getMapGraph, getNearestNode } from "../services/MapService";
 import PathfindingState from "../models/PathfindingState";
 import Interface from "./Interface";
-import { INITIAL_COLORS, INITIAL_VIEW_STATE, MAP_STYLES, INITIAL_SETTINGS } from "../config";
+import { INITIAL_COLORS, INITIAL_VIEW_STATE, INITIAL_GLOBE_VIEW_STATE, MAP_STYLES, INITIAL_SETTINGS } from "../config";
 import useSmoothStateChange from "../hooks/useSmoothStateChange";
 
 function Map() {
@@ -29,6 +30,7 @@ function Map() {
     const [settings, setSettings] = useState(INITIAL_SETTINGS);
     const [colors, setColors] = useState(INITIAL_COLORS);
     const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
+    const [globeViewState, setGlobeViewState] = useState(INITIAL_GLOBE_VIEW_STATE);
     const ui = useRef();
     const fadeRadius = useRef();
     const requestRef = useRef();
@@ -233,7 +235,24 @@ function Map() {
     }
 
     function changeLocation(location) {
-        setViewState({ ...viewState, longitude: location.longitude, latitude: location.latitude, zoom: 13,transitionDuration: 1, transitionInterpolator: new FlyToInterpolator()});
+        if (settings.viewMode === "3d") {
+            setGlobeViewState({
+                longitude: location.longitude,
+                latitude: location.latitude,
+                zoom: 1,
+                transitionDuration: 2000,
+                transitionInterpolator: new FlyToInterpolator()
+            });
+        } else {
+            setViewState({ 
+                ...viewState, 
+                longitude: location.longitude, 
+                latitude: location.latitude, 
+                zoom: 13,
+                transitionDuration: 1000, 
+                transitionInterpolator: new FlyToInterpolator()
+            });
+        }
     }
 
     function changeSettings(newSettings) {
@@ -264,6 +283,10 @@ function Map() {
         changeSettings({...settings, mapStyle});
     }
 
+    function changeViewMode(viewMode) {
+        changeSettings({...settings, viewMode});
+    }
+
     useEffect(() => {
         if(!started) return;
         requestRef.current = requestAnimationFrame(animate);
@@ -283,11 +306,63 @@ function Map() {
         setColors(items.colors);
     }, []);
 
+    const isGlobeMode = settings.viewMode === "3d";
+    
+    if (isGlobeMode) {
+        return (
+            <>
+                <div onContextMenu={(e) => { e.preventDefault(); }}>
+                    <GlobeView
+                        startNode={startNode}
+                        endNode={endNode}
+                        pathData={tripsData.filter(d => d.timestamps[1] <= time)}
+                        colors={colors}
+                        onGlobeClick={mapClick}
+                        globeViewState={globeViewState}
+                        setGlobeViewState={setGlobeViewState}
+                    />
+                </div>
+                <Interface 
+                    ref={ui}
+                    canStart={startNode && endNode}
+                    started={started}
+                    animationEnded={animationEnded}
+                    playbackOn={playbackOn}
+                    time={time}
+                    startPathfinding={startPathfinding}
+                    toggleAnimation={toggleAnimation}
+                    clearPath={clearPath}
+                    timeChanged={setTime}
+                    changeLocation={changeLocation}
+                    maxTime={timer.current}
+                    settings={settings}
+                    setSettings={changeSettings}
+                    changeAlgorithm={changeAlgorithm}
+                    changeMapStyle={changeMapStyle}
+                    changeViewMode={changeViewMode}
+                    colors={colors}
+                    setColors={changeColors}
+                    loading={loading}
+                    cinematic={cinematic}
+                    setCinematic={setCinematic}
+                    placeEnd={placeEnd}
+                    setPlaceEnd={setPlaceEnd}
+                    changeRadius={changeRadius}
+                />
+                <div className="attrib-container"><summary className="maplibregl-ctrl-attrib-button" title="Toggle attribution" aria-label="Toggle attribution"></summary><div className="maplibregl-ctrl-attrib-inner">© <a href="https://carto.com/about-carto/" target="_blank" rel="noopener">CARTO</a>, © <a href="http://www.openstreetmap.org/about/" target="_blank">OpenStreetMap</a> contributors</div></div>
+            </>
+        );
+    }
+
     return (
         <>
             <div onContextMenu={(e) => { e.preventDefault(); }}>
                 <DeckGL
                     initialViewState={viewState}
+                    viewState={viewState}
+                    onViewStateChange={({viewState: newViewState}) => {
+                        setViewState(newViewState);
+                    }}
                     controller={{ doubleClickZoom: false, keyboard: false }}
                     onClick={mapClick}
                 >
@@ -311,13 +386,6 @@ function Map() {
                         fadeTrail={false}
                         currentTime={time}
                         getColor={d => colors[d.color]}
-                        /** Create a nice glowy effect that absolutely kills the performance  */
-                        // getColor={(d) => {
-                        //     if(d.color !== "path") return colors[d.color];
-                        //     const color = colors[d.color];
-                        //     const delta = Math.abs(time - d.timestamp);
-                        //     return color.map(c => Math.max((c * 1.6) - delta * 0.1, c));
-                        // }}
                         updateTriggers={{
                             getColor: [colors.path, colors.route]
                         }}
@@ -326,7 +394,7 @@ function Map() {
                         id="start-end-points"
                         data={[
                             ...(startNode ? [{ coordinates: [startNode.lon, startNode.lat], color: colors.startNodeFill, lineColor: colors.startNodeBorder }] : []),
-                            ...(endNode ? [{ coordinates: [endNode.lon, endNode.lat], color: colors.endNodeFill, lineColor: colors.endNodeBorder }] : []),
+                            ...(endNode ? [{ coordinates: [endNode.lon, endNode.lat], color: colors.endNodeFill, lineColor: colors.endNodeBorder }] : [])
                         ]}
                         pickable={true}
                         opacity={1}
@@ -365,6 +433,7 @@ function Map() {
                 setSettings={changeSettings}
                 changeAlgorithm={changeAlgorithm}
                 changeMapStyle={changeMapStyle}
+                changeViewMode={changeViewMode}
                 colors={colors}
                 setColors={changeColors}
                 loading={loading}
